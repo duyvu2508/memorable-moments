@@ -162,34 +162,6 @@ function StoryCardComponent({
         ),
       );
 
-  const captionTranslateY = prefersReducedMotion
-    ? 0
-    : Animated.add(
-        scrollX.interpolate({
-          inputRange: parallaxInput,
-          outputRange: [20, 0, 20],
-          extrapolate: 'clamp',
-        }),
-        Animated.add(10, Animated.add(Animated.multiply(hover, -10), Animated.multiply(active, -10))),
-      );
-
-  const captionOpacity = prefersReducedMotion
-    ? 1
-    : Animated.add(
-        0.68,
-        Animated.add(
-          Animated.multiply(hover, 0.12),
-          Animated.add(
-            Animated.multiply(active, 0.12),
-            scrollX.interpolate({
-              inputRange: parallaxInput,
-              outputRange: [0, 0.16, 0],
-              extrapolate: 'clamp',
-            }),
-          ),
-        ),
-      );
-
   const ctaOpacity = prefersReducedMotion
     ? isActive
       ? 1
@@ -229,14 +201,6 @@ function StoryCardComponent({
         }),
         Animated.add(6, Animated.add(Animated.multiply(hover, -6), Animated.multiply(active, -6))),
       );
-
-  const captionScale = prefersReducedMotion
-    ? 1
-    : scrollX.interpolate({
-        inputRange: parallaxInput,
-        outputRange: [0.98, 1, 0.98],
-        extrapolate: 'clamp',
-      });
 
   const topRowTranslateY = prefersReducedMotion
     ? 0
@@ -343,13 +307,6 @@ function StoryCardComponent({
                 style={[
                   styles.captionBlock,
                   isCompact ? styles.captionBlockCompact : null,
-                  {
-                    opacity: captionOpacity as any,
-                    transform: [
-                      { translateY: captionTranslateY as any },
-                      { scale: captionScale as any },
-                    ],
-                  },
                 ]}
               >
                 <Text style={styles.subtitle}>{story.subtitle}</Text>

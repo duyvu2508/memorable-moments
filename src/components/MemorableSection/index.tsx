@@ -57,7 +57,7 @@ export function MemorableSection() {
         ]}
       >
         <Text style={styles.eyebrow}>ZIM home section</Text>
-        <Text style={styles.title}>6602 khoảnh khắc đáng nhớ</Text>
+        <Text style={styles.title}>Khoảnh khắc đáng nhớ</Text>
         <Text style={styles.description}>
           Hàng ngàn khoảnh khắc đáng nhớ về hành trình học tập thú vị luôn được
           ZIM ghi lại mỗi ngày tại 21 trung tâm Anh Ngữ ZIM trên toàn quốc.

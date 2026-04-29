@@ -1,91 +1,174 @@
 # Memorable Moments
 
-Bản demo Expo/React Native tái hiện section "Khoảnh khắc đáng nhớ" theo hướng motion hiện đại, ưu tiên hiệu năng và accessibility.
+Ứng dụng Expo/React Native dựng lại section "Khoảnh khắc đáng nhớ" với carousel ngang, motion nhẹ và hỗ trợ OTA qua EAS Update.
 
-## Giải pháp
+## Tech stack
 
-- Dùng `Expo` để demo nhanh trên `Expo Go`, Android/iOS simulator.
-- Tách section thành `MemorableSection`, `StoryCarousel`, `StoryCard`, `stories.ts`, `useReducedMotion.ts` và `useMemorableCarousel.ts` để phần UI, motion và state không dính vào nhau.
-- Animation dùng `Animated` native driver với `transform` và `opacity`, tránh animate `top/left/width/height`.
-- Motion chính gồm:
-  - hover move cho card
-  - overlay reveal và CTA xuất hiện mượt
-  - parallax nhẹ giữa ảnh và caption khi swipe
-  - keyboard focus rõ ràng và hành vi tap 2 lần trên touch
-- Tối ưu code và performance:
-  - hook `useMemorableCarousel` gom toàn bộ logic `activeIndex`, `scrollX`, layout theo viewport, snap handler và `scrollToOffset`
-  - `StoryCard` được `memo` để giảm render lại không cần thiết
-  - `Animated.event` dùng native driver cho parallax, không set state theo từng frame scroll
-  - `FlatList` được cấu hình `initialNumToRender`, `maxToRenderPerBatch`, `windowSize`, `removeClippedSubviews`
-  - kích thước card được tính theo viewport để giảm overdraw và fit màn hình tốt hơn
-- Accessibility:
-  - tôn trọng `prefers-reduced-motion`
-  - `Pressable` có `accessibilityRole`, `accessibilityHint`, `selected state`
-  - thứ tự focus theo thứ tự card trong carousel
-  - touch lần 1 để active, lần 2 để điều hướng
+- Expo SDK 54
+- React 19
+- React Native 0.81
+- TypeScript
+- `expo-updates` cho OTA
 
-## Cấu trúc thư mục
+## Giải pháp đã chọn
+
+Project được triển khai bằng Expo + React Native và `Animated` native API.
+
+Lý do lựa chọn:
+
+- Expo giúp chạy thử nhanh trên thiết bị, simulator và thuận tiện cho luồng build `preview` / `production`
+- `Animated` với `useNativeDriver` phù hợp với yêu cầu motion mượt, hạn chế jank và tránh block main thread
+- section được tách thành `MemorableSection`, `StoryCarousel`, `StoryCard` và các hook riêng để dễ kiểm soát state, hiệu ứng và responsive behavior
+- carousel được thiết kế theo hướng snap theo card, có hover/focus state, parallax nhẹ, overlay reveal và reduced motion để cân bằng giữa cảm giác hiện đại và accessibility
+
+## Cấu trúc chính
 
 ```text
 memorable-moments/
 ├── App.tsx
+├── app.json
+├── eas.json
 ├── src/
 │   ├── components/
 │   │   └── MemorableSection/
 │   │       ├── index.tsx
-│   │       ├── StoryCard.tsx
 │   │       ├── StoryCarousel.tsx
+│   │       ├── StoryCard.tsx
 │   │       └── styles.ts
 │   ├── constants/
 │   │   └── stories.ts
 │   └── hooks/
 │       ├── useMemorableCarousel.ts
 │       └── useReducedMotion.ts
-├── assets/
-├── app.json
-└── README.md
+└── assets/
 ```
 
-## Cài đặt và chạy
+## Chạy local
 
 ```bash
 npm install
 npm run start
 ```
 
-Mở app bằng:
+Shortcut có sẵn:
 
-- `Expo Go` trên điện thoại
-- `npm run android`
-- `npm run ios`
-- `npm run web`
+```bash
+npm run android
+npm run ios
+npm run web
+```
 
-## Build
+## Scripts
 
-APK Android voi EAS Build:
+```bash
+npm run start
+npm run android
+npm run ios
+npm run web
+```
+
+## EAS build profiles
+
+Repo hiện có 3 profile trong [eas.json](/Users/vuminhduy/memorable-moments/eas.json:1):
+
+- `preview`: internal distribution, channel `preview`
+- `ios-simulator`: internal distribution cho iOS Simulator, channel `preview`
+- `production`: production build, channel `production`
+
+Lệnh thường dùng:
 
 ```bash
 npx eas build -p android --profile preview
+npx eas build -p ios --profile preview
+npx eas build -p ios --profile ios-simulator
+npx eas build -p android --profile production
+npx eas build -p ios --profile production
 ```
 
-iOS build:
+## OTA update
+
+App đã cấu hình OTA trong [app.json](/Users/vuminhduy/memorable-moments/app.json:1):
+
+- `updates.url` đã trỏ tới EAS project
+- `runtimeVersion.policy = appVersion`
+
+Publish OTA theo đúng channel của binary đang cài:
+
+```bash
+npx eas update --channel preview --message "fix memorable section"
+npx eas update --channel production --message "hotfix production"
+```
+
+Lưu ý:
+
+- `preview` build chỉ nhận update từ channel `preview`
+- `production` build chỉ nhận update từ channel `production`
+- vì đang dùng `runtimeVersion` theo `appVersion`, các OTA chỉ áp dụng cho binary có cùng version `1.0.0`
+- thay đổi native hoặc đổi config cần build mới, không chỉ OTA
+
+Để kiểm tra OTA trên thiết bị:
+
+1. Publish update.
+2. Tắt hẳn app.
+3. Mở lại lần 1 để app tải update.
+4. Tắt hẳn app lần nữa.
+5. Mở lại lần 2 để thấy bản mới.
+
+## Internal distribution trên iOS
+
+`preview` trên iOS đang là internal distribution kiểu ad hoc. Điều đó có nghĩa là:
+
+- không phải iPhone nào quét QR cũng cài được ngay
+- thiết bị cần được đăng ký UDID trước
+- sau khi thêm thiết bị mới, cần build lại hoặc re-sign build
+
+Luồng thêm iPhone mới:
+
+```bash
+npx eas device:create
+```
+
+Sau khi đăng ký thiết bị:
 
 ```bash
 npx eas build -p ios --profile preview
 ```
 
-Nếu muốn build local native:
+hoặc dùng:
 
 ```bash
-npx expo prebuild
+npx eas build:resign
 ```
 
-## Ghi chú asset
+Lưu ý thêm:
 
-- Ảnh demo đang dùng URL từ `Unsplash` với tham số crop/quality để tải ảnh kích thước hợp lý cho card.
-- Trong bài nộp thực tế, nên thay bằng asset nội bộ đã được nén `WebP` hoặc `AVIF` theo đúng guideline của team.
+- iOS 16+ cần bật Developer Mode để chạy internal build
+- giới hạn ad hoc phụ thuộc Apple Developer provisioning
 
-## Demo nhanh
+## Kiến trúc UI
 
-- Bản repo này chạy trực tiếp bằng `Expo Go`.
-- Chưa đính kèm APK/Expo Snack trong workspace local này, vì việc publish/build cần tài khoản và quy trình bên ngoài môi trường sandbox.
+- `MemorableSection`: section tổng, header và animation vào màn
+- `StoryCarousel`: danh sách ngang, snap logic, active index
+- `StoryCard`: card nội dung, overlay, CTA, motion
+- `useMemorableCarousel`: tính kích thước card, snap interval, scroll state
+- `useReducedMotion`: tôn trọng reduced motion của hệ điều hành
+
+## Motion và hiệu năng
+
+- dùng `Animated` với `useNativeDriver`
+- `FlatList` có `getItemLayout`, `windowSize`, `initialNumToRender`
+- `StoryCard` được `memo`
+- animation ưu tiên `transform` và `opacity`
+- carousel hiện snap theo kích thước card thay vì full page để tránh khoảng trắng khi vuốt
+
+## Ghi chú phát triển
+
+- ảnh story hiện lấy từ remote URL trong `stories.ts`
+- nếu thay dependencies native, sửa config Expo, đổi icon/splash, hoặc nâng SDK thì cần build binary mới
+- nếu chỉ sửa UI, text, style, logic JS/TS hoặc asset JS bundle dùng được OTA
+
+## Kiểm tra type
+
+```bash
+npx tsc --noEmit
+```
