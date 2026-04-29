@@ -89,7 +89,11 @@ export const styles = StyleSheet.create({
     borderWidth: 2,
   },
   image: {
+    position: 'relative',
     justifyContent: 'space-between',
+  },
+  imageMedia: {
+    position: 'absolute',
   },
   overlayBase: {
     ...StyleSheet.absoluteFillObject,

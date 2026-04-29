@@ -2,7 +2,6 @@ import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Animated,
   Easing,
-  ImageBackground,
   Linking,
   Pressable,
   Text,
@@ -27,7 +26,7 @@ type StoryCardProps = {
 };
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
-const AnimatedImageBackground = Animated.createAnimatedComponent(ImageBackground);
+const AnimatedImage = Animated.createAnimatedComponent(Animated.Image);
 const AnimatedButtonPressable = Animated.createAnimatedComponent(Pressable);
 
 function StoryCardComponent({
@@ -100,7 +99,7 @@ function StoryCardComponent({
     ? 0
     : scrollX.interpolate({
         inputRange: parallaxInput,
-        outputRange: [cardWidth * 0.08, 0, -cardWidth * 0.08],
+        outputRange: [cardWidth * 0.035, 0, -cardWidth * 0.035],
         extrapolate: 'clamp',
       });
 
@@ -216,7 +215,9 @@ function StoryCardComponent({
 
   const imageScale = prefersReducedMotion
     ? 1
-    : Animated.add(1.015, Animated.add(Animated.multiply(hover, 0.012), Animated.multiply(active, 0.01)));
+    : Animated.add(1.12, Animated.add(Animated.multiply(hover, 0.018), Animated.multiply(active, 0.012)));
+
+  const imageBleed = Math.max(cardWidth * 0.1, 24);
 
   const ctaTranslateY = prefersReducedMotion
     ? 0
@@ -302,21 +303,25 @@ function StoryCardComponent({
             },
           ]}
         >
-          <AnimatedImageBackground
-            resizeMethod="resize"
-            resizeMode="cover"
-            source={{ uri: story.imageUri }}
-            style={[
-              styles.image,
-              { minHeight: cardMinHeight },
-              {
-                transform: [
-                  { translateX: imageTranslateX as any },
-                  { scale: imageScale as any },
-                ],
-              },
-            ]}
-          >
+          <View style={[styles.image, { minHeight: cardMinHeight }]}>
+            <AnimatedImage
+              resizeMethod="resize"
+              resizeMode="cover"
+              source={{ uri: story.imageUri }}
+              style={[
+                styles.imageMedia,
+                {
+                  top: -imageBleed,
+                  right: -imageBleed,
+                  bottom: -imageBleed,
+                  left: -imageBleed,
+                  transform: [
+                    { translateX: imageTranslateX as any },
+                    { scale: imageScale as any },
+                  ],
+                },
+              ]}
+            />
             <View style={styles.overlayBase} />
             <Animated.View style={[styles.overlayReveal, { opacity: overlayOpacity as any }]} />
             <View style={styles.vignetteTop} />
@@ -378,7 +383,7 @@ function StoryCardComponent({
                 </Animated.View>
               </Animated.View>
             </View>
-          </AnimatedImageBackground>
+          </View>
         </Animated.View>
       </AnimatedPressable>
     </View>
