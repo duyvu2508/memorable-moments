@@ -15,12 +15,15 @@ export function StoryCarousel({ prefersReducedMotion }: StoryCarouselProps) {
     activateCard,
     animatedScrollHandler,
     cardMinHeight,
+    cardGap,
     cardWidth,
     getItemLayout,
     handleSnapEnd,
     isCompact,
     listRef,
     pageWidth,
+    sideInset,
+    snapInterval,
     scrollX,
   } = useMemorableCarousel();
 
@@ -29,7 +32,10 @@ export function StoryCarousel({ prefersReducedMotion }: StoryCarouselProps) {
       <Animated.FlatList
         ref={listRef}
         accessibilityLabel="Danh sách story có thể vuốt ngang"
-        contentContainerStyle={styles.carouselContent}
+        contentContainerStyle={[
+          styles.carouselContent,
+          { paddingHorizontal: sideInset - cardGap / 2 },
+        ]}
         data={stories}
         decelerationRate="fast"
         getItemLayout={getItemLayout}
@@ -39,16 +45,16 @@ export function StoryCarousel({ prefersReducedMotion }: StoryCarouselProps) {
         maxToRenderPerBatch={2}
         onMomentumScrollEnd={handleSnapEnd}
         onScroll={prefersReducedMotion ? undefined : animatedScrollHandler}
-        pagingEnabled
         renderItem={({ item, index }) => (
           <StoryCard
             cardMinHeight={cardMinHeight}
+            cardGap={cardGap}
             cardWidth={cardWidth}
             index={index}
             isActive={index === activeIndex}
             isCompact={isCompact}
             onActivateIndex={activateCard}
-            pageWidth={pageWidth}
+            pageWidth={snapInterval}
             prefersReducedMotion={prefersReducedMotion}
             scrollX={scrollX}
             story={item}
@@ -56,9 +62,10 @@ export function StoryCarousel({ prefersReducedMotion }: StoryCarouselProps) {
         )}
         removeClippedSubviews
         scrollEventThrottle={16}
+        showsVerticalScrollIndicator={false}
         showsHorizontalScrollIndicator={false}
         snapToAlignment="start"
-        snapToInterval={pageWidth}
+        snapToInterval={snapInterval}
         windowSize={3}
       />
     </>

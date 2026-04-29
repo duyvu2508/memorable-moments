@@ -14,6 +14,7 @@ import { colors, styles } from './styles';
 
 type StoryCardProps = {
   cardMinHeight: number;
+  cardGap: number;
   cardWidth: number;
   index: number;
   isActive: boolean;
@@ -31,6 +32,7 @@ const AnimatedButtonPressable = Animated.createAnimatedComponent(Pressable);
 
 function StoryCardComponent({
   cardMinHeight,
+  cardGap,
   cardWidth,
   index,
   isActive,
@@ -265,7 +267,7 @@ function StoryCardComponent({
   };
 
   return (
-    <View style={[styles.cardSlot, { width: pageWidth }]}>
+    <View style={[styles.cardSlot, { width: pageWidth, paddingHorizontal: cardGap / 2 }]}>
       <AnimatedPressable
         accessibilityHint="Chạm để chọn và hiển thị trạng thái nổi bật cho story."
         accessibilityLabel={`${story.title}. ${story.subtitle}`}

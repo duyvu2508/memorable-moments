@@ -16,6 +16,9 @@ export function useMemorableCarousel() {
     const viewport = Math.min(width, 960);
     return isLandscape ? Math.min(viewport * 0.6, 560) : Math.min(viewport - 40, 420);
   }, [isLandscape, width]);
+  const cardGap = isLandscape ? 24 : 16;
+  const snapInterval = cardWidth + cardGap;
+  const sideInset = Math.max((width - cardWidth) / 2, 0);
 
   const cardMinHeight = useMemo(() => {
     if (isCompact) {
@@ -35,27 +38,27 @@ export function useMemorableCarousel() {
       setActiveIndex((currentIndex) => (currentIndex === nextIndex ? currentIndex : nextIndex));
       listRef.current?.scrollToOffset({
         animated: true,
-        offset: nextIndex * pageWidth,
+        offset: nextIndex * snapInterval,
       });
     },
-    [clampIndex, pageWidth],
+    [clampIndex, snapInterval],
   );
 
   const handleSnapEnd = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      const nextIndex = clampIndex(Math.round(event.nativeEvent.contentOffset.x / pageWidth));
+      const nextIndex = clampIndex(Math.round(event.nativeEvent.contentOffset.x / snapInterval));
       setActiveIndex((currentIndex) => (currentIndex === nextIndex ? currentIndex : nextIndex));
     },
-    [clampIndex, pageWidth],
+    [clampIndex, snapInterval],
   );
 
   const getItemLayout = useCallback(
     (_: ArrayLike<typeof stories[number]> | null | undefined, index: number) => ({
-      length: pageWidth,
-      offset: pageWidth * index,
+      length: snapInterval,
+      offset: snapInterval * index,
       index,
     }),
-    [pageWidth],
+    [snapInterval],
   );
 
   const animatedScrollHandler = useMemo(
@@ -72,11 +75,14 @@ export function useMemorableCarousel() {
     animatedScrollHandler,
     cardMinHeight,
     cardWidth,
+    cardGap,
     getItemLayout,
     handleSnapEnd,
     isCompact,
     listRef,
     pageWidth,
+    sideInset,
+    snapInterval,
     scrollX,
   };
 }

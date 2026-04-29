@@ -37,6 +37,7 @@ export function MemorableSection() {
     <ScrollView
       contentInsetAdjustmentBehavior="always"
       contentContainerStyle={styles.section}
+      showsVerticalScrollIndicator={false}
       style={styles.container}
     >
       <Animated.View
